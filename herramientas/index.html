@@ -74,6 +74,11 @@
   .snav-btn .icon-on{display:none;}
   .snav-btn.active .icon-off{display:none;}
   .snav-btn.active .icon-on{display:block;}
+  .cart-badge{
+    margin-left:auto;background:var(--purple);color:var(--white);font-size:0.68rem;font-weight:700;
+    min-width:18px;height:18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;
+  }
+  .snav-btn.active .cart-badge{background:var(--white);color:var(--charcoal);}
   .mobile-tool-select{display:none;}
 
   .main-area{flex:1;min-width:0;padding:44px 56px 90px;}
@@ -223,8 +228,41 @@
     .pp-total-row td{font-weight:700;border-top:2px solid #23262B;}
     .pp-footer{margin-top:30px;font-size:0.85rem;border-top:1px solid #ccc;padding-top:14px;}
     #print-chart svg{max-width:100%;height:auto;}
+
+    body.printing-informe #print-informe, body.printing-informe #print-informe *{visibility:visible;}
+    #print-informe{display:block !important;position:absolute;top:0;left:0;width:100%;padding:30px 36px;}
+    #print-informe .rpt-header{display:flex;align-items:center;gap:16px;margin-bottom:26px;border-bottom:2px solid #23262B;padding-bottom:16px;}
+    #print-informe .rpt-header img{width:52px;height:52px;}
+    #print-informe .rpt-header h1{font-size:1.25rem;margin:0;}
+    #print-informe .rpt-client, #print-informe .rpt-date{font-size:0.85rem;color:#555;margin-top:2px;}
+    #print-informe .rpt-block{margin-bottom:28px;page-break-inside:avoid;}
+    #print-informe .rpt-block h3{font-size:1.05rem;margin:0 0 10px;border-bottom:1px solid #ddd;padding-bottom:6px;color:#23262B;}
+    #print-informe .rpt-block h4{font-size:0.9rem;margin:14px 0 6px;color:#23262B;}
+    #print-informe .rpt-block p{font-size:0.88rem;color:#333;line-height:1.5;}
+    #print-informe .rpt-table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+    #print-informe .rpt-table th, #print-informe .rpt-table td{border:1px solid #ccc;padding:7px 10px;font-size:0.85rem;text-align:left;}
+    #print-informe .rpt-table th{background:#F4F1EC;font-weight:700;}
+    #print-informe .rpt-highlight td{font-weight:700;background:#FAF8F4;}
+    #print-informe .rpt-chart svg{max-width:100%;height:auto;}
+    #print-informe .rpt-footer{margin-top:30px;font-size:0.85rem;border-top:1px solid #ccc;padding-top:14px;}
   }
   @media (prefers-reduced-motion: reduce){ .tool-panel.active{animation:none;} }
+
+  /* ---------- CARRITO DE INFORME ---------- */
+  .cart-toast{
+    position:fixed;bottom:24px;right:24px;background:var(--charcoal);color:var(--white);
+    padding:12px 22px;border-radius:10px;font-size:0.88rem;font-weight:600;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);
+    transition:opacity .25s,transform .25s;pointer-events:none;z-index:999;
+  }
+  .cart-toast.show{opacity:1;transform:translateY(0);}
+  .cart-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;background:var(--sand-3);border-radius:12px;margin-bottom:10px;}
+  .cart-item-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .cart-item-tool{font-weight:700;font-size:0.88rem;color:var(--charcoal);}
+  .cart-item-summary{font-size:0.82rem;color:var(--gray);}
+  .cart-item-actions{display:flex;gap:6px;flex:none;}
+  .cart-move{width:30px;height:30px;border-radius:8px;border:1px solid var(--gray-line);background:var(--white);color:var(--gray);cursor:pointer;font-size:0.9rem;}
+  .cart-move:hover{border-color:var(--purple);color:var(--purple);}
 </style>
 </head>
 <body>
@@ -255,6 +293,7 @@
         <option value="t-redes">Alcance en redes</option>
         <option value="t-cuotas">Cuotas de muestreo</option>
         <option value="t-graficos">Generador de gráficos</option>
+        <option value="t-informe">Informe</option>
       </select>
 
       <nav class="sidebar-nav">
@@ -266,6 +305,7 @@
         <button class="snav-btn" data-ttarget="t-redes"><svg viewBox="0 0 24 24" fill="none" stroke="#6B6F76" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-off"><path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.807-3.808-9.98 0-13.788m13.788 0c3.808 3.807 3.808 9.98 0 13.788M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path></svg><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-on"><path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.807-3.808-9.98 0-13.788m13.788 0c3.808 3.807 3.808 9.98 0 13.788M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path></svg><span>Alcance en redes</span></button>
         <button class="snav-btn" data-ttarget="t-cuotas"><svg viewBox="0 0 24 24" fill="none" stroke="#6B6F76" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-off"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path></svg><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-on"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path></svg><span>Cuotas de muestreo</span></button>
         <button class="snav-btn" data-ttarget="t-graficos"><svg viewBox="0 0 24 24" fill="none" stroke="#6B6F76" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-off"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"></path></svg><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-on"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"></path></svg><span>Generador de gráficos</span></button>
+        <button class="snav-btn" data-ttarget="t-informe"><svg viewBox="0 0 24 24" fill="none" stroke="#6B6F76" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-off"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path></svg><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-on"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path></svg><span>Informe</span><span class="cart-badge" id="cart-badge" style="display:none;"></span></button>
       </nav>
     </aside>
 
@@ -322,6 +362,7 @@
                 <div class="tool-note">Fórmula de muestreo aleatorio simple, con corrección por población finita cuando se indica el universo y ajuste por efecto de diseño (DEFF) si corresponde.</div>
                 <div class="btn-row">
                   <button class="btn-download" onclick="downloadMuestra()">Descargar resultado</button>
+                  <button class="btn-copy" onclick="addMuestraToCart()">+ Agregar al informe</button>
                 </div>
               </div>
             </div>
@@ -364,6 +405,7 @@
             <div class="btn-row">
               <button class="btn-calc" onclick="calcPonderacion()">Calcular factores</button>
               <button class="btn-download" onclick="downloadPonderacion()">Descargar resultado</button>
+              <button class="btn-copy" onclick="addPonderacionToCart()">+ Agregar al informe</button>
             </div>
             <div class="btn-row">
               <button class="btn-copy" onclick="syncPonderacionToCuotas()">↔ Usar este % Población en Cuotas de muestreo</button>
@@ -402,6 +444,7 @@
                 <div class="btn-row">
                   <button class="btn-copy" onclick="copyDhondtResult()">Copiar resultado</button>
                   <button class="btn-download" onclick="downloadDhondt()">Descargar resultado</button>
+                  <button class="btn-copy" onclick="addDhondtToCart()">+ Agregar al informe</button>
                   <span class="copy-feedback" id="dh-copy-feedback"></span>
                 </div>
                 <div class="tool-note">Método D'Hondt: se divide cada votación por 1, 2, 3… y se asignan las bancas a los cocientes más altos.</div>
@@ -451,6 +494,7 @@
                 <div class="tool-note" id="ind-votos-note"></div>
                 <div class="btn-row">
                   <button class="btn-download" onclick="downloadIndecisos()">Descargar resultado</button>
+                  <button class="btn-copy" onclick="addIndecisosToCart()">+ Agregar al informe</button>
                 </div>
                 <div class="tool-note">Los indecisos se reparten proporcionalmente entre todas las opciones cargadas, <strong>incluyendo el voto en blanco/nulo</strong> (se asume que una parte de los indecisos termina votando en blanco, en la misma proporción que el resto). Es el supuesto más habitual, pero no el único posible — si preferís que el blanco quede fijo y no participe del reparto, se puede ajustar.</div>
               </div>
@@ -512,6 +556,7 @@
                 <div class="btn-row">
                   <button class="btn-calc" onclick="generarPropuestaPDF()">Generar PDF de propuesta</button>
                   <button class="btn-download" onclick="downloadPresupuesto()">Descargar resultado (.txt)</button>
+                  <button class="btn-copy" onclick="addPresupuestoToCart()">+ Agregar al informe</button>
                 </div>
               </div>
             </div>
@@ -561,6 +606,7 @@
                 <div class="tool-note">Estimación orientativa a partir del CPM que cargues vos: no es un dato de mercado verificado, sino un supuesto tuyo para planificar. Ajustalo según lo que veas en tus propias campañas del Administrador de Anuncios de Meta.</div>
                 <div class="btn-row">
                   <button class="btn-download" onclick="downloadRedes()">Descargar resultado</button>
+                  <button class="btn-copy" onclick="addRedesToCart()">+ Agregar al informe</button>
                 </div>
               </div>
             </div>
@@ -607,6 +653,7 @@
             <div class="btn-row">
               <button class="btn-calc" onclick="calcCuotas()">Calcular cuotas</button>
               <button class="btn-download" onclick="downloadCuotas()">Descargar resultado</button>
+              <button class="btn-copy" onclick="addCuotasToCart()">+ Agregar al informe</button>
             </div>
             <div class="btn-row">
               <button class="btn-copy" onclick="syncCuotasToPonderacion()">↔ Usar este % Objetivo en Ponderación muestral</button>
@@ -679,8 +726,33 @@
               <button class="btn-download" onclick="downloadChartPNG()">Descargar PNG</button>
               <button class="btn-download" onclick="downloadChartSVG()">Descargar SVG</button>
               <button class="btn-download" onclick="downloadChartPDF()">Descargar PDF</button>
+              <button class="btn-copy" onclick="addGraficoToCart()">+ Agregar al informe</button>
             </div>
             <div class="tool-note">El PDF y el SVG conservan la tipografía de marca (Rubik). El PNG puede mostrarla con una fuente similar en su lugar, según el navegador con el que lo generes.</div>
+          </div>
+
+          <!-- TOOL 6: Informe consolidado -->
+          <div class="tool-panel" id="t-informe">
+            <h3>Informe</h3>
+            <p class="tsub">Reuní los resultados que quieras de cualquier herramienta con el botón "+ Agregar al informe", y armá acá un PDF consolidado para enviar. El orden en que aparecen abajo es el orden en que van a salir en el PDF.</p>
+
+            <div class="tool-row2">
+              <div class="tool-field">
+                <label for="rpt-titulo">Título del informe</label>
+                <input type="text" id="rpt-titulo" value="Informe de trabajo" placeholder="Ej: Informe San Francisco — Septiembre 2026">
+              </div>
+              <div class="tool-field">
+                <label for="rpt-cliente">Cliente / Proyecto (opcional)</label>
+                <input type="text" id="rpt-cliente" placeholder="Ej: Municipalidad de San Francisco">
+              </div>
+            </div>
+
+            <div id="cart-list"></div>
+
+            <div class="btn-row">
+              <button class="btn-calc" onclick="generarInformePDF()">Generar PDF del informe</button>
+              <button class="btn-download" onclick="clearCart()">Vaciar informe</button>
+            </div>
           </div>
 
         </div>
@@ -733,6 +805,10 @@
 
 <div id="print-chart" class="print-only"></div>
 
+<div id="print-informe" class="print-only"></div>
+
+<div id="cart-toast" class="cart-toast"></div>
+
 <script>
   // ============================================================
   // ACCESO — esto NO es seguridad real: es un filtro simple para
@@ -771,6 +847,7 @@
     snavBtns.forEach(b => b.classList.toggle('active', b.dataset.ttarget === id));
     tpanels.forEach(p => p.classList.toggle('active', p.id === id));
     mobileSelect.value = id;
+    if (id === 't-informe' && typeof renderCartPanel === 'function') renderCartPanel();
   }
   snavBtns.forEach(btn => btn.addEventListener('click', () => switchTool(btn.dataset.ttarget)));
   mobileSelect.addEventListener('change', () => switchTool(mobileSelect.value));
@@ -1193,7 +1270,7 @@
   };
 
   window.addEventListener('afterprint', () => {
-    document.body.classList.remove('printing-proposal', 'printing-chart');
+    document.body.classList.remove('printing-proposal', 'printing-chart', 'printing-informe');
   });
 
   // ---------- Tool 3b: social media reach estimator ----------
@@ -1685,6 +1762,212 @@
     document.body.classList.add('printing-chart');
     window.print();
   };
+
+  // ============================================================
+  // CARRITO DE INFORME
+  // ============================================================
+  let reportCart = [];
+  try {
+    reportCart = JSON.parse(sessionStorage.getItem('2612c_cart') || '[]');
+  } catch (err) { reportCart = []; }
+
+  function saveCart(){
+    try { sessionStorage.setItem('2612c_cart', JSON.stringify(reportCart)); } catch (err) { /* ignora si no hay espacio */ }
+    updateCartBadge();
+  }
+
+  function updateCartBadge(){
+    const badge = document.getElementById('cart-badge');
+    const opt = document.querySelector('#mobileToolSelect option[value="t-informe"]');
+    if (reportCart.length > 0) {
+      badge.textContent = reportCart.length;
+      badge.style.display = 'inline-flex';
+      if (opt) opt.textContent = 'Informe (' + reportCart.length + ')';
+    } else {
+      badge.style.display = 'none';
+      if (opt) opt.textContent = 'Informe';
+    }
+  }
+
+  function showCartToast(msg){
+    const toast = document.getElementById('cart-toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._cartToastTimer);
+    window._cartToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function addToCart(tool, summary, html){
+    reportCart.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2), tool, summary, html });
+    saveCart();
+    showCartToast('Agregado al informe (' + reportCart.length + (reportCart.length === 1 ? ' elemento' : ' elementos') + ')');
+  }
+
+  function renderCartPanel(){
+    const listEl = document.getElementById('cart-list');
+    if (!listEl) return;
+    if (!reportCart.length) {
+      listEl.innerHTML = '<div class="tool-note">Todavía no agregaste nada. Andá a cualquier herramienta y usá el botón "+ Agregar al informe".</div>';
+      return;
+    }
+    let html = '';
+    reportCart.forEach((item, i) => {
+      html += '<div class="cart-item">'
+        + '<div class="cart-item-info"><span class="cart-item-tool">' + item.tool + '</span><span class="cart-item-summary">' + item.summary + '</span></div>'
+        + '<div class="cart-item-actions">'
+        + (i > 0 ? '<button class="cart-move" type="button" onclick="moveCartItem(' + i + ',-1)" title="Subir">↑</button>' : '')
+        + (i < reportCart.length - 1 ? '<button class="cart-move" type="button" onclick="moveCartItem(' + i + ',1)" title="Bajar">↓</button>' : '')
+        + '<button class="party-remove" type="button" onclick="removeCartItem(' + i + ')">×</button>'
+        + '</div></div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  window.removeCartItem = function(i){
+    reportCart.splice(i, 1);
+    saveCart();
+    renderCartPanel();
+  };
+  window.moveCartItem = function(i, dir){
+    const j = i + dir;
+    if (j < 0 || j >= reportCart.length) return;
+    const tmp = reportCart[i]; reportCart[i] = reportCart[j]; reportCart[j] = tmp;
+    saveCart();
+    renderCartPanel();
+  };
+  window.clearCart = function(){
+    if (!reportCart.length) return;
+    if (!confirm('¿Vaciar todo el informe?')) return;
+    reportCart = [];
+    saveCart();
+    renderCartPanel();
+  };
+
+  // ---- snapshots por herramienta ----
+  window.addMuestraToCart = function(){
+    const summary = ssOut.textContent + ' casos necesarios (' + ssConf.options[ssConf.selectedIndex].text + ' confianza, ' + ssMargin.value + '% margen)';
+    const html = '<div class="rpt-block">'
+      + '<h3>Tamaño de muestra</h3>'
+      + '<table class="rpt-table"><tbody>'
+      + '<tr><td>Población</td><td>' + escapeXML(ssPop.value || 'No especificada (se asume infinita)') + '</td></tr>'
+      + '<tr><td>Nivel de confianza</td><td>' + ssConf.options[ssConf.selectedIndex].text + '</td></tr>'
+      + '<tr><td>Margen de error</td><td>' + ssMargin.value + '%</td></tr>'
+      + '<tr><td>Heterogeneidad esperada</td><td>' + ssP.value + '%</td></tr>'
+      + '<tr><td>Efecto de diseño (DEFF)</td><td>' + ssDeff.value + '</td></tr>'
+      + '<tr class="rpt-highlight"><td>Tamaño de muestra necesario</td><td>' + ssOut.textContent + ' casos</td></tr>'
+      + '</tbody></table></div>';
+    addToCart('Tamaño de muestra', summary, html);
+  };
+
+  window.addPonderacionToCart = function(){
+    const { genero, edad } = lastPonderacionResult;
+    const rowsHtml = (cats) => cats.map(c => '<tr><td>' + escapeXML(c.name) + '</td><td>' + c.pop.toFixed(1) + '%</td><td>' + c.sample.toFixed(1) + '%</td><td>' + c.factor.toFixed(2) + '</td></tr>').join('');
+    const html = '<div class="rpt-block">'
+      + '<h3>Ponderación muestral</h3>'
+      + '<h4>Género</h4><table class="rpt-table"><thead><tr><th>Categoría</th><th>% Pob.</th><th>% Muestra</th><th>Factor</th></tr></thead><tbody>' + rowsHtml(genero) + '</tbody></table>'
+      + '<h4>Edad</h4><table class="rpt-table"><thead><tr><th>Categoría</th><th>% Pob.</th><th>% Muestra</th><th>Factor</th></tr></thead><tbody>' + rowsHtml(edad) + '</tbody></table>'
+      + '</div>';
+    addToCart('Ponderación muestral', 'Factores por Género y Edad', html);
+  };
+
+  window.addDhondtToCart = function(){
+    const { seats, parties } = lastDhondtResult;
+    if (!parties.length) return;
+    const rows = parties.map(p => '<tr><td>' + escapeXML(p.name) + '</td><td>' + Math.round(p.votes).toLocaleString('es-AR') + '</td><td>' + p.pct.toFixed(1) + '%</td><td>' + p.seats + '</td></tr>').join('');
+    const html = '<div class="rpt-block">'
+      + '<h3>Reparto de bancas — Método D\'Hondt</h3>'
+      + '<p>Bancas a repartir: ' + seats + '</p>'
+      + '<table class="rpt-table"><thead><tr><th>Lista</th><th>Votos</th><th>%</th><th>Bancas</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '</div>';
+    addToCart("Reparto de bancas (D'Hondt)", seats + ' bancas entre ' + parties.length + ' listas', html);
+  };
+
+  window.addIndecisosToCart = function(){
+    if (!lastIndecisosResult) return;
+    const { projected, participacion, padron } = lastIndecisosResult;
+    const rows = projected.map(o => '<tr><td>' + escapeXML(o.name) + '</td><td>' + o.pct.toFixed(1) + '%</td><td>' + o.proj.toFixed(1) + '%</td><td>' + (o.votos !== null ? o.votos.toLocaleString('es-AR') : '—') + '</td></tr>').join('');
+    const html = '<div class="rpt-block">'
+      + '<h3>Simulador de indecisos</h3>'
+      + '<table class="rpt-table"><thead><tr><th>Opción</th><th>Original</th><th>Proyectado</th><th>Votos</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<p>Participación esperada: ' + participacion + '%' + (padron ? ' — Padrón habilitado: ' + Math.round(padron).toLocaleString('es-AR') : '') + '</p>'
+      + '</div>';
+    addToCart('Simulador de indecisos', 'Proyección con ' + projected.length + ' opciones', html);
+  };
+
+  window.addPresupuestoToCart = function(){
+    if (!lastPresupuesto) return;
+    const p = lastPresupuesto;
+    const html = '<div class="rpt-block">'
+      + '<h3>Presupuesto de campo</h3>'
+      + '<table class="rpt-table"><tbody>'
+      + '<tr><td>Casos</td><td>' + p.casos.toLocaleString('es-AR') + '</td></tr>'
+      + '<tr><td>Pago a encuestas</td><td>$' + Math.round(p.pagoTotal).toLocaleString('es-AR') + '</td></tr>'
+      + '<tr><td>Coordinación y gestión</td><td>$' + Math.round(p.coordinacionTotal).toLocaleString('es-AR') + '</td></tr>'
+      + '<tr><td>Viáticos y combustible</td><td>$' + Math.round(p.viaticosTotal).toLocaleString('es-AR') + '</td></tr>'
+      + '<tr class="rpt-highlight"><td>TOTAL</td><td>$' + Math.round(p.total).toLocaleString('es-AR') + '</td></tr>'
+      + '</tbody></table></div>';
+    addToCart('Presupuesto de campo', '$' + Math.round(p.total).toLocaleString('es-AR') + ' total estimado', html);
+  };
+
+  window.addRedesToCart = function(){
+    const objetivo = document.getElementById('rd-objetivo');
+    const alcance = document.getElementById('rd-alcance').textContent;
+    const html = '<div class="rpt-block">'
+      + '<h3>Alcance en redes</h3>'
+      + '<table class="rpt-table"><tbody>'
+      + '<tr><td>Objetivo</td><td>' + objetivo.options[objetivo.selectedIndex].text + '</td></tr>'
+      + '<tr><td>Presupuesto de pauta</td><td>$' + document.getElementById('rd-presupuesto').value + '</td></tr>'
+      + '<tr><td>CPM estimado</td><td>$' + document.getElementById('rd-cpm').value + '</td></tr>'
+      + '<tr><td>Impresiones estimadas</td><td>' + document.getElementById('rd-impresiones').textContent + '</td></tr>'
+      + '<tr class="rpt-highlight"><td>Alcance estimado</td><td>' + alcance + ' personas</td></tr>'
+      + '</tbody></table></div>';
+    addToCart('Alcance en redes', alcance + ' personas estimadas', html);
+  };
+
+  window.addCuotasToCart = function(){
+    const { genero, edad, total } = lastCuotasResult;
+    const rowsHtml = (cats) => cats.map(c => '<tr><td>' + escapeXML(c.name) + '</td><td>' + c.pct.toFixed(1) + '%</td><td>' + c.cuota + '</td></tr>').join('');
+    const html = '<div class="rpt-block">'
+      + '<h3>Cuotas de muestreo</h3>'
+      + '<p>Muestra total objetivo: ' + total + ' casos</p>'
+      + '<h4>Género</h4><table class="rpt-table"><thead><tr><th>Categoría</th><th>% Objetivo</th><th>Cuota</th></tr></thead><tbody>' + rowsHtml(genero) + '</tbody></table>'
+      + '<h4>Edad</h4><table class="rpt-table"><thead><tr><th>Categoría</th><th>% Objetivo</th><th>Cuota</th></tr></thead><tbody>' + rowsHtml(edad) + '</tbody></table>'
+      + '</div>';
+    addToCart('Cuotas de muestreo', total + ' casos objetivo', html);
+  };
+
+  window.addGraficoToCart = function(){
+    if (!currentChartSVG) return;
+    const title = document.getElementById('ch-title').value.trim() || 'Gráfico';
+    const html = '<div class="rpt-block rpt-chart">' + currentChartSVG + '</div>';
+    addToCart('Generador de gráficos', title, html);
+  };
+
+  // ---- generación del PDF consolidado ----
+  window.generarInformePDF = function(){
+    if (!reportCart.length) { alert('Todavía no agregaste nada al informe. Usá "+ Agregar al informe" en cualquier herramienta.'); return; }
+    const titulo = document.getElementById('rpt-titulo').value.trim() || 'Informe de trabajo';
+    const cliente = document.getElementById('rpt-cliente').value.trim();
+    const fecha = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    let body = '';
+    reportCart.forEach(item => { body += item.html; });
+
+    document.getElementById('print-informe').innerHTML =
+      '<div class="rpt-header">'
+      + '<img src="' + LOGO_DATA_URI + '" alt="2612/c">'
+      + '<div><h1>' + escapeXML(titulo) + '</h1>'
+      + (cliente ? '<div class="rpt-client">Cliente / Proyecto: ' + escapeXML(cliente) + '</div>' : '')
+      + '<div class="rpt-date">' + fecha + '</div></div>'
+      + '</div>'
+      + body
+      + '<div class="rpt-footer"><strong>Lic. Gonzalo Sagarraga</strong><br>+54 9 3564 611823<br>gsagarraga@gmail.com</div>';
+
+    document.body.classList.add('printing-informe');
+    window.print();
+  };
+
+  updateCartBadge();
 </script>
 </body>
 </html>
