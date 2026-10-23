@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#7F1F81">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Encuestas">
+<title>Encuestas — 2612/c</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#23262B; --sand:#F4F1EC; --sand-2:#EAE5DC; --sand-3:#FAF8F4;
+    --purple:#7F1F81; --purple-dark:#5E1761; --white:#fff; --gray:#6B6F76; --line:#E7E3DB;
+    --ok:#2F7D5B; --warn:#B0463F;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{font-family:'Rubik',system-ui,sans-serif;background:var(--sand-3);color:var(--charcoal);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  input,select,button,textarea{font-family:inherit;font-size:1rem;}
+  h1,h2,h3{margin:0;font-weight:800;letter-spacing:-0.01em;}
+
+  .top{position:sticky;top:0;z-index:20;background:var(--white);border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;}
+  .brand img{width:30px;height:30px;border-radius:8px;}
+  .brand .b2{color:var(--purple);}
+  .brand small{font-weight:500;color:var(--gray);font-size:0.78rem;margin-left:2px;}
+  .status{display:flex;align-items:center;gap:8px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--sand);color:var(--charcoal);border:1px solid var(--line);white-space:nowrap;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);}
+  .pill.off .dot{background:var(--warn);}
+  .pill.pend{background:#FFF4E0;border-color:#F0DDB8;color:#7A5518;}
+  .iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--white);color:var(--charcoal);cursor:pointer;font-size:1.1rem;}
+  .iconbtn.spin{animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  main{max-width:640px;margin:0 auto;padding:18px 16px calc(110px + env(safe-area-inset-bottom));}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;}
+  .card h2{font-size:1.05rem;margin-bottom:4px;}
+  .muted{color:var(--gray);font-size:0.86rem;}
+  .field{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+  .field label{font-weight:600;font-size:0.88rem;}
+  input[type=text],input[type=url],input[type=password],input[type=number],textarea{
+    width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--white);color:var(--charcoal);}
+  textarea{min-height:130px;resize:vertical;}
+  input:focus,textarea:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(127,31,129,.12);}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 22px;border-radius:12px;
+    border:1.5px solid transparent;font-weight:700;cursor:pointer;transition:background .15s;}
+  .btn-primary{background:var(--purple);color:#fff;} .btn-primary:active{background:var(--purple-dark);}
+  .btn-dark{background:var(--charcoal);color:#fff;}
+  .btn-ghost{background:var(--white);border-color:var(--line);color:var(--charcoal);}
+  .btn-block{width:100%;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .formcard{display:flex;flex-direction:column;gap:10px;}
+  .formcard .meta{font-size:0.8rem;color:var(--gray);}
+  .msg{font-size:0.86rem;padding:10px 12px;border-radius:10px;margin-top:10px;}
+  .msg.err{background:#FBEAE8;color:#8A2E27;} .msg.ok{background:#E6F3EC;color:#1E5C42;} .msg.info{background:var(--sand);color:var(--charcoal);}
+
+  .progress{height:6px;background:var(--sand-2);border-radius:99px;overflow:hidden;margin:6px 0 14px;}
+  .progress > div{height:100%;background:var(--purple);transition:width .25s;}
+  .qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .qnum{font-size:0.8rem;font-weight:700;color:var(--purple);}
+  .geo{font-size:0.74rem;font-weight:600;padding:4px 9px;border-radius:99px;background:var(--sand);border:1px solid var(--line);cursor:pointer;}
+  .geo.ok{background:#E6F3EC;border-color:#BFE0CF;color:#1E5C42;} .geo.bad{background:#FBEAE8;border-color:#F0C6C1;color:#8A2E27;}
+  .qtext{font-size:1.25rem;font-weight:700;line-height:1.3;margin:6px 0 16px;}
+  .req{color:var(--warn);}
+  .opt{display:flex;align-items:center;gap:12px;padding:15px 16px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--white);cursor:pointer;font-weight:500;}
+  .opt input{width:22px;height:22px;accent-color:var(--purple);flex:none;margin:0;}
+  .opt.sel{border-color:var(--purple);background:var(--sand-3);}
+  .other{margin:-4px 0 10px 0;}
+  .qbar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center;z-index:15;}
+  .qbar .btn{flex:1;max-width:300px;}
+  .done{text-align:center;padding:34px 18px;}
+  .done .check{width:68px;height:68px;border-radius:50%;background:#E6F3EC;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;}
+  .link{background:none;border:none;color:var(--purple);font-weight:600;cursor:pointer;padding:6px 0;text-decoration:underline;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="icon-192.png" alt=""> <span>2612<span class="b2">/c</span> <small>Encuestas</small></span></div>
+  <div class="status">
+    <span class="pill pend hidden" id="pendPill">0 por enviar</span>
+    <span class="pill" id="netPill"><span class="dot"></span><span id="netTxt">En línea</span></span>
+    <button class="iconbtn" id="btnSync" title="Sincronizar ahora" aria-label="Sincronizar ahora">↻</button>
+  </div>
+</header>
+
+<main id="view"></main>
+<div class="qbar hidden" id="qbar">
+  <button class="btn btn-ghost" id="btnBack">Anterior</button>
+  <button class="btn btn-primary" id="btnNext">Siguiente</button>
+</div>
+
+<script src="sync-core.js"></script>
+<script>
+(function(){
+  var view = document.getElementById('view');
+  var qbar = document.getElementById('qbar');
+  var survey = null;
+  var lastError = null;
+  var inFlight = false;
+  var currentView = 'home';
+
+  function h(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function uuid(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function pad(n){ return String(n).padStart(2, '0'); }
+  function fmtLocal(d){
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  function fmtHora(ts){ if(!ts) return 'nunca'; var d = new Date(ts); return pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function b64urlDecode(s){
+    s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '=';
+    return decodeURIComponent(escape(atob(s)));
+  }
+  async function deviceId(){
+    var id = await S2612.getMeta('deviceId');
+    if (!id) { id = 'D-' + uuid().slice(0, 8); await S2612.setMeta('deviceId', id); }
+    return id;
+  }
+
+  async function updateStatus(){
+    var online = navigator.onLine;
+    var pill = document.getElementById('netPill');
+    pill.classList.toggle('off', !online);
+    document.getElementById('netTxt').textContent = online ? 'En línea' : 'Sin conexión';
+    var n = await S2612.pendingCount();
+    var pp = document.getElementById('pendPill');
+    pp.textContent = n + ' por enviar';
+    pp.classList.toggle('hidden', n === 0);
+  }
+
+  async function trySync(manual){
+    var cfg = await S2612.getCfg();
+    if (!cfg || !cfg.url || !cfg.token) return;
+    if (inFlight) return;
+    inFlight = true;
+    document.getElementById('btnSync').classList.add('spin');
+    var errores = [];
+    try { await S2612.pullForms(cfg); } catch (e) { errores.push(e.message || 'No se pudieron actualizar los formularios.'); }
+    try { await S2612.pushPending(cfg); } catch (e) { errores.push(e.message || 'No se pudieron enviar las respuestas.'); }
+    if (!errores.length) { await S2612.setMeta('lastSync', Date.now()); lastError = null; }
+    else { lastError = navigator.onLine ? errores[0] : 'Sin conexión: las respuestas quedan guardadas en este teléfono.'; }
+    try { await S2612.purgeOld(); } catch (e) {}
+    inFlight = false;
+    document.getElementById('btnSync').classList.remove('spin');
+    await updateStatus();
+    if (!survey && currentView === 'home') renderHome();
+  }
+
+  async function renderHome(){
+    currentView = 'home';
+    qbar.classList.add('hidden');
+    var cfg = await S2612.getCfg();
+    if (!cfg || !cfg.url || !cfg.token) return renderSetup();
+    var forms = await S2612.getAll('forms');
+    var pend = await S2612.pendingCount();
+    var last = await S2612.getMeta('lastSync');
+    var all = await S2612.listResponses();
+    var enviadas = all.filter(function(r){ return r.status === 'sent'; }).length;
+
+    var html = '';
+    html += '<div class="card"><h2>Encuestador/a</h2>' +
+      '<div class="field"><label for="inInterviewer">Tu nombre</label>' +
+      '<input type="text" id="inInterviewer" placeholder="Ej: Ana Gómez" value="' + h(cfg.interviewer || '') + '" autocomplete="name"></div></div>';
+
+    html += '<h2 style="margin:18px 2px 10px">Formularios</h2>';
+    if (!forms.length) {
+      html += '<div class="card"><p class="muted" style="margin:0">Todavía no hay formularios descargados en este teléfono. Conectate a internet y tocá ↻ para descargarlos.</p></div>';
+    }
+    forms.forEach(function(f){
+      html += '<div class="card formcard"><div><h2>' + h(f.title) + '</h2>' +
+        (f.description ? '<p class="muted" style="margin:2px 0 0">' + h(f.description) + '</p>' : '') + '</div>' +
+        '<div class="meta">' + (f.questions || []).length + ' preguntas' + (f.captureGeo ? ' · registra ubicación' : '') + '</div>' +
+        '<button class="btn btn-primary btn-block" data-start="' + h(f.id) + '">Iniciar encuesta</button></div>';
+    });
+
+    html += '<div class="card"><h2>Sincronización</h2>' +
+      '<p class="muted" style="margin:4px 0 0"><b>' + pend + '</b> por enviar · <b>' + enviadas + '</b> enviadas · última sincronización: ' + fmtHora(last) + '</p>' +
+      (lastError ? '<div class="msg err">' + h(lastError) + '</div>' : '') +
+      '<div class="row" style="margin-top:12px">' +
+      '<button class="btn btn-dark" id="btnSyncNow">Sincronizar ahora</button>' +
+      '<button class="btn btn-ghost" id="btnBackup">Descargar respaldo (CSV)</button></div>' +
+      '<p class="muted" style="margin:12px 0 0">Las respuestas se guardan primero en este teléfono y se envían solas cuando hay conexión. Si tu navegador no permite el envío con la app cerrada, se envían apenas la abrís.</p></div>';
+
+    html += '<div style="text-align:center"><button class="link" id="btnCfg">Cambiar configuración</button></div>';
+    view.innerHTML = html;
+  }
+
+  function renderSetup(prefill){
+    currentView = 'setup';
+    qbar.classList.add('hidden');
+    prefill = prefill || {};
+    view.innerHTML =
+      '<div class="card"><h2>Configurar conexión</h2>' +
+      '<p class="muted" style="margin:4px 0 0">Lo más fácil: abrí el enlace de configuración que te pasó tu coordinador. También podés cargarlo a mano:</p>' +
+      '<div class="field"><label for="cfgUrl">URL de conexión</label><input type="url" id="cfgUrl" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec" value="' + h(prefill.url || '') + '"></div>' +
+      '<div class="field"><label for="cfgToken">Clave de encuestadores</label><input type="password" id="cfgToken" autocomplete="off" value="' + h(prefill.token || '') + '"></div>' +
+      '<div class="field"><label for="cfgName">Tu nombre</label><input type="text" id="cfgName" value="' + h(prefill.interviewer || '') + '"></div>' +
+      '<div id="cfgMsg"></div>' +
+      '<button class="btn btn-primary btn-block" id="btnSaveCfg">Guardar y conectar</button></div>';
+  }
+
+  function getGeo(){
+    return new Promise(function(resolve){
+      if (!navigator.geolocation) return resolve({ error: 'Este dispositivo no permite ubicación.' });
+      navigator.geolocation.getCurrentPosition(function(p){
+        resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy });
+      }, function(e){
+        resolve({ error: e.code === 1 ? 'Permiso de ubicación denegado.' : e.code === 2 ? 'Ubicación no disponible.' : 'La ubicación tardó demasiado.' });
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+    });
+  }
+
+  function buildSchema(form){
+    var used = {};
+    return (form.questions || []).map(function(q){
+      var base = (q.text || 'Pregunta').replace(/\s+/g, ' ').trim().slice(0, 120);
+      var hd = base, n = 2;
+      while (used[hd]) hd = base + ' (' + (n++) + ')';
+      used[hd] = true;
+      return { id: q.id, h: hd };
+    });
+  }
+
+  async function startSurvey(formId){
+    var cfg = await S2612.getCfg();
+    var name = ((document.getElementById('inInterviewer') || {}).value || '').trim();
+    if (!name) { alert('Escribí tu nombre antes de empezar.'); var i = document.getElementById('inInterviewer'); if (i) i.focus(); return; }
+    cfg.interviewer = name; await S2612.setCfg(cfg);
+    var form = await S2612.get('forms', formId);
+    if (!form) return;
+    survey = { id: uuid(), form: form, started: new Date(), index: 0, answers: {}, geo: null, geoError: null, interviewer: name, otherOn: {} };
+    if (form.captureGeo) {
+      getGeo().then(function(g){
+        if (!survey) return;
+        if (g.error) { survey.geoError = g.error; } else { survey.geo = g; survey.geoError = null; }
+        paintGeo();
+      });
+    }
+    renderQuestion();
+  }
+
+  function paintGeo(){
+    var el = document.getElementById('geoChip');
+    if (!el || !survey) return;
+    if (!survey.form.captureGeo) { el.classList.add('hidden'); return; }
+    el.className = 'geo ' + (survey.geo ? 'ok' : survey.geoError ? 'bad' : '');
+    el.textContent = survey.geo ? ('📍 ubicación ±' + Math.round(survey.geo.acc) + ' m') : survey.geoError ? ('📍 ' + survey.geoError + ' (tocá para reintentar)') : '📍 buscando ubicación…';
+    el.onclick = function(){
+      if (survey.geo) return;
+      survey.geoError = null; paintGeo();
+      getGeo().then(function(g){ if (!survey) return; if (g.error) survey.geoError = g.error; else survey.geo = g; paintGeo(); });
+    };
+  }
+
+  function renderQuestion(){
+    currentView = 'survey';
+    var qs = survey.form.questions || [];
+    var q = qs[survey.index];
+    var total = qs.length;
+    var val = survey.answers[q.id];
+    var body = '';
+
+    if (q.type === 'single' || q.type === 'multiple') {
+      var multi = q.type === 'multiple';
+      var sel = multi ? (Array.isArray(val) ? val : []) : (val == null ? null : val);
+      (q.options || []).forEach(function(o, i){
+        var checked = multi ? sel.indexOf(o) >= 0 : sel === o;
+        body += '<label class="opt' + (checked ? ' sel' : '') + '"><input type="' + (multi ? 'checkbox' : 'radio') + '" name="opt" data-opt="' + i + '"' + (checked ? ' checked' : '') + '><span>' + h(o) + '</span></label>';
+      });
+      if (q.allowOther) {
+        var cur = multi ? sel.filter(function(x){ return String(x).indexOf('Otro: ') === 0; })[0] : (String(sel || '').indexOf('Otro: ') === 0 ? sel : null);
+        var isOther = !!cur || !!survey.otherOn[q.id];
+        var otherText = cur ? String(cur).slice(6) : '';
+        body += '<label class="opt' + (isOther ? ' sel' : '') + '"><input type="' + (multi ? 'checkbox' : 'radio') + '" name="opt" data-other="1"' + (isOther ? ' checked' : '') + '><span>Otro</span></label>';
+        body += '<div class="other' + (isOther ? '' : ' hidden') + '"><input type="text" id="otherTxt" placeholder="Especificá…" value="' + h(otherText) + '"></div>';
+      }
+    } else if (q.type === 'number') {
+      body = '<input type="number" id="numIn" inputmode="decimal" ' + (q.min != null && q.min !== '' ? 'min="' + h(q.min) + '" ' : '') + (q.max != null && q.max !== '' ? 'max="' + h(q.max) + '" ' : '') + 'value="' + h(val == null ? '' : val) + '" placeholder="Escribí un número">';
+    } else {
+      body = '<textarea id="openIn" placeholder="Escribí la respuesta…">' + h(val == null ? '' : val) + '</textarea>';
+    }
+
+    view.innerHTML =
+      '<div class="qhead"><span class="qnum">Pregunta ' + (survey.index + 1) + ' de ' + total + '</span><span class="geo hidden" id="geoChip"></span></div>' +
+      '<div class="progress"><div style="width:' + Math.round(survey.index / total * 100) + '%"></div></div>' +
+      '<div class="qtext">' + h(q.text) + (q.required ? ' <span class="req">*</span>' : '') + '</div>' +
+      '<div id="qbody">' + body + '</div><div id="qmsg"></div>' +
+      '<div style="margin-top:24px;text-align:center"><button class="link" id="btnCancelSurvey">Cancelar esta encuesta</button></div>';
+
+    document.getElementById('btnBack').classList.toggle('hidden', survey.index === 0);
+    document.getElementById('btnNext').textContent = survey.index === total - 1 ? 'Finalizar' : 'Siguiente';
+    qbar.classList.remove('hidden');
+    var gc = document.getElementById('geoChip');
+    if (survey.form.captureGeo) { gc.classList.remove('hidden'); paintGeo(); }
+    window.scrollTo(0, 0);
+  }
+
+  function readAnswer(){
+    var q = survey.form.questions[survey.index];
+    var v = null;
+    if (q.type === 'single' || q.type === 'multiple') {
+      var multi = q.type === 'multiple';
+      var picked = [];
+      Array.prototype.forEach.call(view.querySelectorAll('input[name=opt]'), function(inp){
+        if (!inp.checked) return;
+        if (inp.getAttribute('data-other')) {
+          var t = ((document.getElementById('otherTxt') || {}).value || '').trim();
+          picked.push('Otro: ' + t);
+        } else {
+          picked.push((q.options || [])[Number(inp.getAttribute('data-opt'))]);
+        }
+      });
+      v = multi ? picked : (picked.length ? picked[0] : null);
+      survey.otherOn[q.id] = !!view.querySelector('input[data-other]:checked');
+    } else if (q.type === 'number') {
+      var raw = (document.getElementById('numIn') || {}).value;
+      v = (raw === '' || raw == null) ? null : Number(raw);
+    } else {
+      var t2 = ((document.getElementById('openIn') || {}).value || '').trim();
+      v = t2 === '' ? null : t2;
+    }
+    survey.answers[q.id] = v;
+    return v;
+  }
+
+  function isEmpty(v){
+    if (v == null) return true;
+    if (Array.isArray(v)) return v.filter(function(x){ return x !== 'Otro: '; }).length === 0;
+    if (v === '' || v === 'Otro: ') return true;
+    return false;
+  }
+  function showQMsg(t){ var m = document.getElementById('qmsg'); if (m) m.innerHTML = t ? '<div class="msg err">' + h(t) + '</div>' : ''; }
+
+  async function next(){
+    var q = survey.form.questions[survey.index];
+    var v = readAnswer();
+    if (q.required && isEmpty(v)) return showQMsg('Esta pregunta es obligatoria.');
+    if (q.type === 'number' && v != null) {
+      if (q.min != null && q.min !== '' && v < Number(q.min)) return showQMsg('El valor mínimo es ' + q.min + '.');
+      if (q.max != null && q.max !== '' && v > Number(q.max)) return showQMsg('El valor máximo es ' + q.max + '.');
+    }
+    if (survey.index < survey.form.questions.length - 1) { survey.index++; renderQuestion(); }
+    else await finish();
+  }
+  function back(){ readAnswer(); if (survey.index > 0) { survey.index--; renderQuestion(); } }
+
+  async function finish(){
+    var f = survey.form;
+    if (f.captureGeo && f.geoRequired && !survey.geo) {
+      var g = await getGeo();
+      if (g.error) return showQMsg('Esta encuesta exige ubicación. ' + g.error + ' Activá el GPS y tocá la etiqueta de ubicación para reintentar.');
+      survey.geo = g; paintGeo();
+    }
+    var ended = new Date();
+    var dev = await deviceId();
+    var answers = {};
+    f.questions.forEach(function(q){
+      var v = survey.answers[q.id];
+      if (Array.isArray(v)) v = v.filter(function(x){ return x !== 'Otro: '; });
+      if (v === 'Otro: ') v = null;
+      answers[q.id] = (v === undefined) ? null : v;
+    });
+    var rec = {
+      id: survey.id, status: 'pending', createdAt: Date.now(),
+      formId: f.id, formTitle: f.title, formVersion: f.version || 1,
+      schema: buildSchema(f),
+      interviewer: survey.interviewer, deviceId: dev,
+      startedAt: fmtLocal(survey.started), endedAt: fmtLocal(ended),
+      startedISO: survey.started.toISOString(), endedISO: ended.toISOString(),
+      durationSec: Math.round((ended - survey.started) / 1000),
+      geo: survey.geo ? { lat: survey.geo.lat, lng: survey.geo.lng, acc: survey.geo.acc } : null,
+      geoError: survey.geo ? null : survey.geoError,
+      answers: answers
+    };
+    await S2612.put('responses', rec);
+    survey = null;
+    await updateStatus();
+    registerBgSync();
+    await renderDone();
+    trySync(false);
+  }
+
+  async function renderDone(){
+    currentView = 'done';
+    qbar.classList.add('hidden');
+    var pend = await S2612.pendingCount();
+    view.innerHTML = '<div class="card done"><div class="check">✓</div><h2>¡Encuesta guardada!</h2>' +
+      '<p class="muted" id="doneTxt">Quedó guardada en este teléfono (' + pend + ' por enviar). Se enviará sola cuando haya conexión.</p>' +
+      '<button class="btn btn-primary btn-block" id="btnNewSurvey" style="margin-top:14px">Nueva encuesta</button></div>';
+    window.scrollTo(0, 0);
+  }
+
+  function registerBgSync(){
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+      navigator.serviceWorker.ready.then(function(reg){ return reg.sync.register('sync-respuestas'); }).catch(function(){});
+    }
+  }
+
+  async function downloadBackup(){
+    var all = await S2612.listResponses();
+    if (!all.length) { alert('Todavía no hay respuestas guardadas en este teléfono.'); return; }
+    var fixed = ['ID', 'Formulario', 'Estado', 'Fecha inicio', 'Fecha fin', 'Duración (s)', 'Encuestador', 'Dispositivo', 'Latitud', 'Longitud', 'Precisión (m)'];
+    var heads = [];
+    all.forEach(function(r){ (r.schema || []).forEach(function(c){ var k = r.formId + '::' + c.h; if (heads.indexOf(k) < 0) heads.push(k); }); });
+    function cell(v){ if (v == null) return ''; if (Array.isArray(v)) v = v.join(' | '); v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
+    var lines = [fixed.concat(heads.map(function(k){ return k.split('::').slice(1).join('::'); })).map(cell).join(',')];
+    all.forEach(function(r){
+      var g = r.geo || {};
+      var row = [r.id, r.formTitle, r.status === 'sent' ? 'enviada' : 'pendiente', r.startedAt, r.endedAt, r.durationSec, r.interviewer, r.deviceId, g.lat, g.lng, g.acc == null ? '' : Math.round(g.acc)];
+      heads.forEach(function(k){
+        var col = (r.schema || []).filter(function(c){ return r.formId + '::' + c.h === k; })[0];
+        row.push(col ? r.answers[col.id] : '');
+      });
+      lines.push(row.map(cell).join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'respaldo-encuestas-' + fmtLocal(new Date()).replace(/[: ]/g, '-') + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  document.addEventListener('click', async function(e){
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.getAttribute('data-start')) return startSurvey(t.getAttribute('data-start'));
+    if (t.id === 'btnSyncNow' || t.id === 'btnSync') { await trySync(true); if (currentView === 'home') renderHome(); return; }
+    if (t.id === 'btnBackup') return downloadBackup();
+    if (t.id === 'btnCfg') { var c = await S2612.getCfg(); return renderSetup(c ? { url: c.url, token: c.token, interviewer: c.interviewer } : {}); }
+    if (t.id === 'btnNewSurvey') return renderHome();
+    if (t.id === 'btnNext') return next();
+    if (t.id === 'btnBack') return back();
+    if (t.id === 'btnCancelSurvey') { if (confirm('¿Cancelar esta encuesta? Se pierden las respuestas cargadas.')) { survey = null; renderHome(); } return; }
+    if (t.id === 'btnSaveCfg') {
+      var url = document.getElementById('cfgUrl').value.trim();
+      var tok = document.getElementById('cfgToken').value.trim();
+      var nm = document.getElementById('cfgName').value.trim();
+      var msg = document.getElementById('cfgMsg');
+      if (!/^https:\/\/.+/i.test(url) || !tok) { msg.innerHTML = '<div class="msg err">Completá la URL (empieza con https://) y la clave.</div>'; return; }
+      await S2612.setCfg({ key: 'cfg', url: url, token: tok, interviewer: nm });
+      msg.innerHTML = '<div class="msg info">Conectando…</div>';
+      await trySync(true);
+      return renderHome();
+    }
+  });
+
+  document.addEventListener('change', function(e){
+    var inp = e.target;
+    if (!survey || !inp.matches || !inp.matches('input[name=opt]')) return;
+    var q = survey.form.questions[survey.index];
+    if (q.type === 'single') Array.prototype.forEach.call(view.querySelectorAll('.opt'), function(l){ l.classList.remove('sel'); });
+    var lab = inp.closest('.opt'); if (lab) lab.classList.toggle('sel', inp.checked);
+    var other = view.querySelector('input[data-other]');
+    var box = view.querySelector('.other');
+    if (box && other) box.classList.toggle('hidden', !other.checked);
+    if (inp.getAttribute('data-other') && inp.checked) { var ot = document.getElementById('otherTxt'); if (ot) ot.focus(); }
+  });
+
+  document.addEventListener('input', async function(e){
+    if (e.target && e.target.id === 'inInterviewer') {
+      var cfg = await S2612.getCfg(); if (cfg) { cfg.interviewer = e.target.value; await S2612.setCfg(cfg); }
+    }
+  });
+
+  window.addEventListener('online', function(){ updateStatus(); trySync(false); });
+  window.addEventListener('offline', updateStatus);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') { updateStatus(); trySync(false); } });
+  setInterval(function(){ if (!survey) trySync(false); }, 45000);
+
+  async function boot(){
+    var m = location.hash.match(/cfg=([^&]+)/);
+    if (m) {
+      try {
+        var c = JSON.parse(b64urlDecode(m[1]));
+        if (c.u && c.t) {
+          var prev = (await S2612.getCfg()) || {};
+          await S2612.setCfg({ key: 'cfg', url: c.u, token: c.t, interviewer: c.n || prev.interviewer || '' });
+        }
+      } catch (err) {}
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+    await updateStatus();
+    await renderHome();
+    trySync(false);
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

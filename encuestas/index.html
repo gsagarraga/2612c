@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Constructor de encuestas — 2612/c</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--charcoal:#23262B;--sand:#F4F1EC;--sand-2:#EAE5DC;--sand-3:#FAF8F4;--purple:#7F1F81;--purple-dark:#5E1761;--white:#fff;--gray:#6B6F76;--line:#E7E3DB;--ok:#2F7D5B;--warn:#B0463F;}
+  *{box-sizing:border-box;}
+  input,select,button,textarea{font-family:inherit;font-size:0.95rem;}
+  body{margin:0;background:var(--sand-3);color:var(--charcoal);font-family:'Rubik',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-0.01em;}
+  a{color:inherit;}
+
+  #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .gate-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:40px 34px;max-width:380px;width:100%;text-align:center;box-shadow:0 30px 60px rgba(35,38,43,.10);}
+  .gate-card img{width:64px;height:64px;border-radius:14px;margin-bottom:16px;}
+  .gate-card h1{font-size:1.3rem;margin-bottom:4px;} .gate-card p{color:var(--gray);font-size:.9rem;margin:0 0 20px;}
+  .gate-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;text-align:center;margin-bottom:12px;}
+  .gate-card button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--charcoal);color:#fff;font-weight:600;cursor:pointer;}
+  .gate-error{color:var(--warn);font-size:.85rem;margin-top:12px;display:none;} .gate-error.show{display:block;}
+
+  #app{display:none;}
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:30;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;} .brand img{width:32px;height:32px;border-radius:8px;} .brand .b2{color:var(--purple);} .brand small{font-weight:500;color:var(--gray);}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:600;color:var(--gray);cursor:pointer;}
+  .tab.active{background:var(--charcoal);border-color:var(--charcoal);color:#fff;}
+  .toplinks a{font-size:.85rem;color:var(--gray);text-decoration:none;margin-left:14px;} .toplinks a:hover{color:var(--purple);}
+  main{max-width:1180px;margin:0 auto;padding:28px 24px 90px;}
+  .panel{display:none;} .panel.active{display:block;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;}
+  .card h3{font-size:1.05rem;margin-bottom:4px;} .muted{color:var(--gray);font-size:.86rem;}
+  .field{display:flex;flex-direction:column;gap:6px;margin:12px 0;} .field label{font-weight:600;font-size:.86rem;}
+  input[type=text],input[type=url],input[type=password],input[type=number],textarea,select{width:100%;padding:10px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--charcoal);}
+  textarea{min-height:92px;resize:vertical;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(127,31,129,.12);}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid transparent;font-weight:600;cursor:pointer;}
+  .btn-primary{background:var(--purple);color:#fff;} .btn-primary:hover{background:var(--purple-dark);}
+  .btn-dark{background:var(--charcoal);color:#fff;} .btn-ghost{background:#fff;border-color:var(--line);color:var(--charcoal);} .btn-ghost:hover{border-color:var(--purple);color:var(--purple);}
+  .btn-danger{background:#fff;border-color:#EBC5C1;color:var(--warn);}
+  .btn-sm{padding:6px 11px;font-size:.82rem;border-radius:8px;}
+  .btn[disabled]{opacity:.4;cursor:default;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .check{display:flex;align-items:center;gap:9px;font-size:.9rem;font-weight:500;cursor:pointer;margin:8px 0;} .check input{width:18px;height:18px;accent-color:var(--purple);}
+
+  .layout{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
+  .flist .fitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff;cursor:pointer;}
+  .flist .fitem.sel{border-color:var(--purple);box-shadow:0 0 0 3px rgba(127,31,129,.1);}
+  .fitem .ft{font-weight:700;} .fitem .fm{font-size:.78rem;color:var(--gray);margin-top:3px;}
+  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--sand);border:1px solid var(--line);color:var(--charcoal);margin-right:6px;}
+  .badge.pub{background:#E6F3EC;border-color:#BFE0CF;color:#1E5C42;} .badge.dirty{background:#FFF4E0;border-color:#F0DDB8;color:#7A5518;} .badge.arch{background:#EEE;color:#666;}
+
+  .qcard{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;background:var(--sand-3);}
+  .qtop{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .qn{width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex:none;}
+  .qtop select{width:auto;flex:1;min-width:150px;} .qact{display:flex;gap:6px;margin-left:auto;}
+  .addbar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px;}
+  .pv{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:16px;}
+  .pv-q{margin-bottom:14px;} .pv-o{display:flex;gap:8px;align-items:center;font-size:.9rem;padding:3px 0;color:#444;}
+  .pv-line{height:34px;border:1px solid var(--line);border-radius:8px;margin-top:6px;background:var(--sand-3);}
+  .save-ind{font-size:.78rem;color:var(--ok);font-weight:600;opacity:0;transition:opacity .3s;} .save-ind.show{opacity:1;}
+  pre.code{background:#1F2226;color:#E8E6E1;border-radius:12px;padding:14px;font-size:.74rem;line-height:1.5;max-height:300px;overflow:auto;white-space:pre;margin:10px 0;}
+  ol.steps{padding-left:20px;margin:10px 0;} ol.steps li{margin-bottom:8px;}
+  .msg{padding:10px 13px;border-radius:10px;font-size:.88rem;margin-top:10px;} .msg.ok{background:#E6F3EC;color:#1E5C42;} .msg.err{background:#FBEAE8;color:#8A2E27;} .msg.info{background:var(--sand);}
+  .linkbox{word-break:break-all;background:var(--sand);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.8rem;}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--charcoal);color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:.88rem;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:99;max-width:calc(100vw - 44px);}
+  .toast.show{opacity:1;transform:none;}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} main{padding:20px 14px 90px;} .top{padding:12px 14px;} }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <img src="icon-192.png" alt="2612/c">
+    <h1>Panel privado</h1>
+    <p>Constructor de encuestas — 2612/c</p>
+    <input type="password" id="gate-pass" placeholder="Contraseña" autocomplete="off">
+    <button onclick="tryUnlock()">Entrar</button>
+    <div class="gate-error" id="gate-error">Contraseña incorrecta.</div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <div class="brand"><img src="icon-192.png" alt=""> <span>2612<span class="b2">/c</span> <small>Constructor de encuestas</small></span></div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="forms">Formularios</button>
+      <button class="tab" data-tab="conn">Conexión con Google</button>
+      <button class="tab" data-tab="team">Encuestadores</button>
+    </nav>
+    <div class="toplinks"><a href="app.html" target="_blank" rel="noopener">Abrir app de campo</a><a href="../herramientas/index.html">← Herramientas</a></div>
+  </header>
+
+  <main>
+    <section class="panel active" id="p-forms">
+      <div class="layout">
+        <aside>
+          <div class="row" style="margin-bottom:12px">
+            <button class="btn btn-primary" id="btnNew">＋ Nuevo formulario</button>
+            <button class="btn btn-ghost" id="btnImport">Importar</button>
+            <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+          </div>
+          <div class="flist" id="flist"></div>
+        </aside>
+        <div id="editor"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-conn">
+      <div class="card">
+        <h3>Conexión con tu Google Drive</h3>
+        <p class="muted">Las respuestas se guardan en una planilla de Google Sheets en tu Drive. Para eso se usa un pequeño script de Google que vas a crear una sola vez (5 minutos).</p>
+        <ol class="steps">
+          <li>Entrá a <b>script.google.com</b> con tu cuenta de Google y tocá <b>Nuevo proyecto</b>.</li>
+          <li>Borrá el código que aparece y pegá el de abajo (botón <b>Copiar código</b>).</li>
+          <li>Al principio del código, <b>cambiá las dos claves</b> (<code>CLAVE_CAMPO</code> y <code>CLAVE_ADMIN</code>) por textos tuyos, distintos entre sí.</li>
+          <li>Tocá <b>Implementar → Nueva implementación</b> → tipo <b>Aplicación web</b>. En <i>Ejecutar como</i> elegí <b>Yo</b> y en <i>Quién tiene acceso</i> elegí <b>Cualquier persona</b>. Autorizá los permisos (Google avisa que es una app sin verificar: es tu propio script, tocá <i>Avanzado → Ir a…</i>).</li>
+          <li>Copiá la <b>URL de la aplicación web</b> (termina en <code>/exec</code>) y pegala abajo junto con tus dos claves.</li>
+          <li>Si más adelante modificás el código, hay que hacer <b>Implementar → Administrar implementaciones → editar → Nueva versión</b>; si no, los cambios no se aplican.</li>
+        </ol>
+        <pre class="code" id="codeBox"></pre>
+        <div class="row"><button class="btn btn-dark" id="btnCopyCode">Copiar código</button></div>
+      </div>
+      <div class="card">
+        <h3>Datos de conexión</h3>
+        <div class="field"><label for="cfgUrl">URL de la aplicación web</label><input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:220px"><label for="cfgAdmin">Clave de administrador</label><input type="password" id="cfgAdmin" autocomplete="off"></div>
+          <div class="field" style="flex:1;min-width:220px"><label for="cfgCampo">Clave de encuestadores</label><input type="password" id="cfgCampo" autocomplete="off"></div>
+        </div>
+        <p class="muted">Se guardan solo en este navegador.</p>
+        <div class="row">
+          <button class="btn btn-primary" id="btnTest">Probar conexión</button>
+          <button class="btn btn-ghost" id="btnPull">Traer formularios del servidor</button>
+          <a class="btn btn-ghost" id="btnSheet" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">Abrir planilla en Drive</a>
+        </div>
+        <div id="connMsg"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-team">
+      <div class="card">
+        <h3>Enlace para tu equipo de campo</h3>
+        <p class="muted">Cada encuestador abre este enlace <b>una vez, con internet</b>, en su celular. Queda configurado, descarga los formularios y después funciona sin conexión.</p>
+        <div id="teamBox"></div>
+        <ol class="steps">
+          <li>Pasales el enlace por WhatsApp. Debe abrirse en <b>Chrome</b> (Android) o <b>Safari</b> (iPhone).</li>
+          <li>Que toquen <b>Instalar app</b> / <b>Agregar a pantalla de inicio</b> para tenerla como una app más.</li>
+          <li>Antes de salir a campo, que abran la app con internet para descargar la última versión de los formularios.</li>
+          <li>El GPS funciona sin internet, pero el celular tiene que tener la <b>ubicación activada</b> y haberle dado permiso a la app.</li>
+        </ol>
+        <p class="muted"><b>Ojo:</b> el enlace incluye la clave de encuestadores. Pasalo solo a tu equipo. Si alguien deja de trabajar con vos, cambiá esa clave en el script y generá un enlace nuevo.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CODE_GS = "/**\n * 2612/c - Plataforma de encuestas\n * Backend en Google Apps Script. Guarda formularios y respuestas en una\n * planilla de Google Sheets dentro de TU Drive.\n *\n * ANTES DE IMPLEMENTAR: cambia las dos claves de abajo por textos propios.\n *  - CLAVE_CAMPO: la usan los celulares de los encuestadores.\n *  - CLAVE_ADMIN: la usas vos desde el constructor (publica y archiva formularios).\n */\nconst CLAVE_CAMPO = 'CAMBIAR-clave-encuestadores';\nconst CLAVE_ADMIN = 'CAMBIAR-clave-administrador';\n\nconst NOMBRE_PLANILLA = '2612c - Encuestas';\nconst HOJA_FORMULARIOS = '_formularios';\nconst VERSION = 1;\nconst COLUMNAS_FIJAS = [\n  'ID respuesta', 'Fecha inicio', 'Fecha fin', 'Duracion (s)', 'Encuestador',\n  'Dispositivo', 'Latitud', 'Longitud', 'Precision (m)', 'Mapa', 'Version del formulario'\n];\n\nfunction salida_(obj) {\n  return ContentService.createTextOutput(JSON.stringify(obj))\n    .setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction clavesConfiguradas_() {\n  return CLAVE_CAMPO.indexOf('CAMBIAR') < 0 &&\n         CLAVE_ADMIN.indexOf('CAMBIAR') < 0 &&\n         CLAVE_CAMPO !== CLAVE_ADMIN;\n}\n\nfunction rol_(token) {\n  if (token && token === CLAVE_ADMIN) return 'admin';\n  if (token && token === CLAVE_CAMPO) return 'campo';\n  return null;\n}\n\nfunction planilla_() {\n  const props = PropertiesService.getScriptProperties();\n  const id = props.getProperty('SS_ID');\n  if (id) {\n    try { return SpreadsheetApp.openById(id); } catch (e) { /* se crea una nueva */ }\n  }\n  const ss = SpreadsheetApp.create(NOMBRE_PLANILLA);\n  props.setProperty('SS_ID', ss.getId());\n  hojaForms_(ss);\n  const sobrantes = ss.getSheets().filter(function (s) { return s.getName() !== HOJA_FORMULARIOS; });\n  if (sobrantes.length && ss.getSheets().length > 1) ss.deleteSheet(sobrantes[0]);\n  return ss;\n}\n\nfunction hojaForms_(ss) {\n  let sh = ss.getSheetByName(HOJA_FORMULARIOS);\n  if (!sh) {\n    sh = ss.insertSheet(HOJA_FORMULARIOS);\n    sh.getRange(1, 1, 1, 6).setValues([['id', 'titulo', 'version', 'activo', 'actualizado', 'json']]).setFontWeight('bold');\n    sh.setFrozenRows(1);\n  }\n  return sh;\n}\n\nfunction filasForms_(ss) {\n  const sh = hojaForms_(ss);\n  const ult = sh.getLastRow();\n  if (ult < 2) return [];\n  return sh.getRange(2, 1, ult - 1, 6).getValues();\n}\n\nfunction listarFormularios_(todos) {\n  const out = [];\n  filasForms_(planilla_()).forEach(function (r) {\n    const activo = String(r[3]).toUpperCase() === 'SI';\n    if (!todos && !activo) return;\n    try {\n      const f = JSON.parse(r[5]);\n      f.active = activo;\n      out.push(f);\n    } catch (e) { /* fila daniada: se ignora */ }\n  });\n  return out;\n}\n\nfunction conteos_(ss) {\n  const props = PropertiesService.getScriptProperties();\n  const out = {};\n  filasForms_(ss).forEach(function (r) {\n    const nombre = props.getProperty('HOJA:' + r[0]);\n    const sh = nombre ? ss.getSheetByName(nombre) : null;\n    out[r[0]] = sh ? Math.max(0, sh.getLastRow() - 1) : 0;\n  });\n  return out;\n}\n\nfunction publicar_(form) {\n  if (!form || !form.id || !form.title || !Array.isArray(form.questions)) {\n    throw new Error('Formulario invalido.');\n  }\n  const json = JSON.stringify(form);\n  if (json.length > 45000) throw new Error('El formulario es demasiado largo.');\n  const lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    const sh = hojaForms_(planilla_());\n    const ult = sh.getLastRow();\n    let fila = -1;\n    if (ult >= 2) {\n      const ids = sh.getRange(2, 1, ult - 1, 1).getValues();\n      for (let i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(form.id)) { fila = i + 2; break; }\n    }\n    const activo = form.active === false ? 'NO' : 'SI';\n    const datos = [[form.id, form.title, form.version || 1, activo, new Date(), json]];\n    if (fila > 0) sh.getRange(fila, 1, 1, 6).setValues(datos);\n    else sh.getRange(ult + 1, 1, 1, 6).setValues(datos);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction setActivo_(id, activo) {\n  const lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    const sh = hojaForms_(planilla_());\n    const ult = sh.getLastRow();\n    if (ult < 2) return false;\n    const ids = sh.getRange(2, 1, ult - 1, 1).getValues();\n    for (let i = 0; i < ids.length; i++) {\n      if (String(ids[i][0]) === String(id)) {\n        sh.getRange(i + 2, 4, 1, 1).setValue(activo ? 'SI' : 'NO');\n        return true;\n      }\n    }\n    return false;\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction limpiarNombre_(t) {\n  const base = String(t || 'Respuestas').replace(/[\\[\\]\\*\\?\\/\\\\:]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80);\n  return base || 'Respuestas';\n}\n\nfunction hojaRespuestas_(ss, formId, titulo) {\n  const props = PropertiesService.getScriptProperties();\n  const guardado = props.getProperty('HOJA:' + formId);\n  if (guardado) {\n    const existente = ss.getSheetByName(guardado);\n    if (existente) return existente;\n  }\n  const base = limpiarNombre_(titulo);\n  let nombre = base;\n  let n = 2;\n  while (ss.getSheetByName(nombre)) nombre = base + ' (' + (n++) + ')';\n  const sh = ss.insertSheet(nombre);\n  sh.getRange(1, 1, 1, COLUMNAS_FIJAS.length).setValues([COLUMNAS_FIJAS]).setFontWeight('bold');\n  sh.setFrozenRows(1);\n  props.setProperty('HOJA:' + formId, nombre);\n  return sh;\n}\n\nfunction valor_(v) {\n  if (v === null || v === undefined) return '';\n  if (Array.isArray(v)) v = v.map(String).join(' | ');\n  if (typeof v === 'number' || typeof v === 'boolean') return v;\n  const s = String(v);\n  // evita que una respuesta abierta se interprete como formula de la planilla\n  if (/^[=+\\-@]/.test(s)) return \"'\" + s;\n  return s;\n}\n\nfunction guardarRespuestas_(items) {\n  const lock = LockService.getScriptLock();\n  lock.waitLock(30000);\n  try {\n    const ss = planilla_();\n    const guardadas = [];\n    const porForm = {};\n    items.forEach(function (it) {\n      if (!it || !it.id || !it.formId) return;\n      (porForm[it.formId] = porForm[it.formId] || []).push(it);\n    });\n\n    Object.keys(porForm).forEach(function (formId) {\n      const lista = porForm[formId];\n      const sh = hojaRespuestas_(ss, formId, lista[0].formTitle || formId);\n\n      // ids ya guardados (evita duplicados si el celular reintenta)\n      const ult = sh.getLastRow();\n      const existentes = {};\n      if (ult >= 2) {\n        sh.getRange(2, 1, ult - 1, 1).getValues().forEach(function (f) { existentes[String(f[0])] = true; });\n      }\n      const nuevas = [];\n      lista.forEach(function (it) {\n        if (existentes[String(it.id)]) { guardadas.push(it.id); return; }\n        existentes[String(it.id)] = true;\n        nuevas.push(it);\n      });\n      if (!nuevas.length) return;\n\n      // columnas: las fijas + una por pregunta (se agregan si el formulario cambio)\n      const ancho0 = Math.max(sh.getLastColumn(), COLUMNAS_FIJAS.length);\n      const hdr = sh.getRange(1, 1, 1, ancho0).getValues()[0].map(String);\n      nuevas.forEach(function (it) {\n        (it.schema || []).forEach(function (c) {\n          if (hdr.indexOf(c.h) < 0) hdr.push(c.h);\n        });\n      });\n      if (hdr.length > ancho0) {\n        if (hdr.length > sh.getMaxColumns()) sh.insertColumnsAfter(sh.getMaxColumns(), hdr.length - sh.getMaxColumns());\n        sh.getRange(1, ancho0 + 1, 1, hdr.length - ancho0).setValues([hdr.slice(ancho0)]).setFontWeight('bold');\n      }\n\n      const filas = nuevas.map(function (it) {\n        const fila = new Array(hdr.length).fill('');\n        const g = it.geo || {};\n        fila[0] = it.id;\n        fila[1] = it.startedAt || '';\n        fila[2] = it.endedAt || '';\n        fila[3] = it.durationSec === undefined ? '' : it.durationSec;\n        fila[4] = valor_(it.interviewer);\n        fila[5] = valor_(it.deviceId);\n        fila[6] = g.lat === undefined ? '' : g.lat;\n        fila[7] = g.lng === undefined ? '' : g.lng;\n        fila[8] = g.acc === undefined ? '' : Math.round(g.acc);\n        fila[9] = (g.lat !== undefined && g.lng !== undefined) ? 'https://www.google.com/maps?q=' + g.lat + ',' + g.lng : '';\n        fila[10] = it.formVersion === undefined ? '' : it.formVersion;\n        (it.schema || []).forEach(function (c) {\n          const col = hdr.indexOf(c.h);\n          if (col >= 0) fila[col] = valor_((it.answers || {})[c.id]);\n        });\n        return fila;\n      });\n\n      const primera = sh.getLastRow() + 1;\n      sh.getRange(primera, 1, filas.length, hdr.length).setValues(filas);\n      nuevas.forEach(function (it) { guardadas.push(it.id); });\n    });\n    return guardadas;\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  try {\n    const p = (e && e.parameter) || {};\n    if (!clavesConfiguradas_()) return salida_({ ok: false, error: 'Faltan configurar las claves en el script.' });\n    const rol = rol_(p.token);\n    if (!rol) return salida_({ ok: false, error: 'Clave incorrecta.' });\n    const accion = p.action || 'ping';\n    if (accion === 'ping') {\n      const out = { ok: true, rol: rol, version: VERSION };\n      if (rol === 'admin') {\n        const ss = planilla_();\n        out.planillaUrl = ss.getUrl();\n        out.conteos = conteos_(ss);\n      }\n      return salida_(out);\n    }\n    if (accion === 'forms') return salida_({ ok: true, forms: listarFormularios_(rol === 'admin') });\n    return salida_({ ok: false, error: 'Accion desconocida.' });\n  } catch (err) {\n    return salida_({ ok: false, error: String((err && err.message) || err) });\n  }\n}\n\nfunction doPost(e) {\n  try {\n    if (!clavesConfiguradas_()) return salida_({ ok: false, error: 'Faltan configurar las claves en el script.' });\n    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');\n    const rol = rol_(body.token);\n    if (!rol) return salida_({ ok: false, error: 'Clave incorrecta.' });\n\n    if (body.action === 'responses') {\n      const items = Array.isArray(body.items) ? body.items : [];\n      return salida_({ ok: true, saved: guardarRespuestas_(items) });\n    }\n    if (rol !== 'admin') return salida_({ ok: false, error: 'Esta accion requiere la clave de administrador.' });\n\n    if (body.action === 'publish') {\n      publicar_(body.form);\n      return salida_({ ok: true });\n    }\n    if (body.action === 'setActive') {\n      return salida_({ ok: setActivo_(body.id, !!body.active) });\n    }\n    return salida_({ ok: false, error: 'Accion desconocida.' });\n  } catch (err) {\n    return salida_({ ok: false, error: String((err && err.message) || err) });\n  }\n}\n";
+const CLAVE_DE_ACCESO = "2612gonzalo";
+
+function tryUnlock(){
+  if (document.getElementById('gate-pass').value === CLAVE_DE_ACCESO) {
+    sessionStorage.setItem('2612c_unlocked', '1');
+    showApp();
+  } else document.getElementById('gate-error').classList.add('show');
+}
+function showApp(){ document.getElementById('gate').style.display = 'none'; document.getElementById('app').style.display = 'block'; }
+document.getElementById('gate-pass').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+if (sessionStorage.getItem('2612c_unlocked') === '1') showApp();
+
+(function(){
+  const LS_FORMS = '2612c_enc_forms', LS_CFG = '2612c_enc_cfg';
+  const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+  let forms = load(LS_FORMS, []);
+  let cfg = Object.assign({ url: '', admin: '', campo: '', planillaUrl: '', counts: {} }, load(LS_CFG, {}));
+  let currentId = forms.length ? forms[0].id : null;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = p => p + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+  const TYPES = { single: 'Opción única', multiple: 'Opción múltiple', open: 'Respuesta abierta', number: 'Número' };
+
+  function saveForms(){ localStorage.setItem(LS_FORMS, JSON.stringify(forms)); }
+  function saveCfg(){ localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
+  function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2600); }
+  const cur = () => forms.find(f => f.id === currentId);
+
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'p-' + b.dataset.tab));
+    if (b.dataset.tab === 'team') renderTeam();
+  }));
+
+  function badges(f){
+    if (!f.published) return '<span class="badge">Borrador</span>';
+    let s = '';
+    if (f.active === false) s += '<span class="badge arch">Archivado</span>';
+    else s += '<span class="badge pub">Publicado v' + f.publishedVersion + '</span>';
+    if (f.dirty) s += '<span class="badge dirty">Cambios sin publicar</span>';
+    return s;
+  }
+  function renderList(){
+    const el = $('flist');
+    if (!forms.length) { el.innerHTML = '<p class="muted">Todavía no creaste formularios. Tocá “Nuevo formulario”.</p>'; return; }
+    el.innerHTML = forms.map(f => {
+      const n = cfg.counts && cfg.counts[f.id];
+      return '<div class="fitem' + (f.id === currentId ? ' sel' : '') + '" data-id="' + esc(f.id) + '"><div class="ft">' + esc(f.title || 'Sin título') + '</div>' +
+        '<div class="fm">' + badges(f) + (f.questions || []).length + ' preguntas' + (n != null ? ' · ' + n + ' respuestas' : '') + '</div></div>';
+    }).join('');
+  }
+  $('flist').addEventListener('click', e => { const it = e.target.closest('.fitem'); if (it) { currentId = it.dataset.id; renderList(); renderEditor(); } });
+
+  function newForm(){
+    const f = { id: uid('f'), title: 'Nueva encuesta', description: '', version: 1, captureGeo: true, geoRequired: false, published: false, publishedVersion: 0, active: true, dirty: true,
+      questions: [{ id: uid('q'), type: 'single', text: '', required: true, options: ['Opción 1', 'Opción 2'], allowOther: false }] };
+    forms.unshift(f); currentId = f.id; saveForms(); renderList(); renderEditor();
+  }
+  $('btnNew').addEventListener('click', newForm);
+
+  function renderEditor(){
+    const f = cur(); const el = $('editor');
+    if (!f) { el.innerHTML = '<div class="card"><p class="muted" style="margin:0">Elegí un formulario de la lista o creá uno nuevo.</p></div>'; return; }
+    let h = '<div class="card"><div class="row" style="justify-content:space-between"><h3>Formulario</h3><span class="save-ind" id="saveInd">Guardado</span></div>' +
+      '<div class="field"><label>Título</label><input type="text" data-f="title" value="' + esc(f.title) + '"></div>' +
+      '<div class="field"><label>Descripción (opcional, la ve el encuestador)</label><textarea data-f="description" style="min-height:64px">' + esc(f.description) + '</textarea></div>' +
+      '<label class="check"><input type="checkbox" data-f="captureGeo"' + (f.captureGeo ? ' checked' : '') + '> Registrar ubicación (GPS) de cada encuesta</label>' +
+      '<label class="check" style="margin-left:27px;opacity:' + (f.captureGeo ? 1 : .45) + '"><input type="checkbox" data-f="geoRequired"' + (f.geoRequired ? ' checked' : '') + (f.captureGeo ? '' : ' disabled') + '> Exigir ubicación para poder finalizar</label>' +
+      '<p class="muted" style="margin:6px 0 0">La fecha y hora de inicio y fin y la duración se registran siempre, de forma automática.</p></div>';
+
+    h += '<div class="card"><h3>Preguntas</h3><div id="qlist">';
+    f.questions.forEach((q, i) => { h += qcard(q, i, f.questions.length); });
+    h += '</div><div class="addbar">' +
+      Object.keys(TYPES).map(t => '<button class="btn btn-ghost btn-sm" data-add="' + t + '">＋ ' + TYPES[t] + '</button>').join('') + '</div></div>';
+
+    h += '<div class="card"><h3>Vista previa</h3><div class="pv" id="pv">' + previewHTML(f) + '</div></div>';
+
+    h += '<div class="card"><div class="row">' +
+      '<button class="btn btn-primary" data-act="publish">' + (f.published ? 'Publicar cambios' : 'Publicar') + '</button>' +
+      (f.published ? '<button class="btn btn-ghost" data-act="toggleActive">' + (f.active === false ? 'Reactivar' : 'Archivar') + '</button>' : '') +
+      '<button class="btn btn-ghost" data-act="dupForm">Duplicar</button>' +
+      '<button class="btn btn-ghost" data-act="export">Exportar</button>' +
+      '<button class="btn btn-danger" data-act="delForm">Quitar de acá</button></div>' +
+      '<p class="muted" style="margin:10px 0 0">Publicar envía el formulario a tu Google; los celulares lo descargan al conectarse. Archivar lo oculta de los celulares sin borrar las respuestas. “Quitar de acá” solo borra la copia de este navegador.</p><div id="pubMsg"></div></div>';
+    el.innerHTML = h;
+  }
+
+  function qcard(q, i, n){
+    const choice = q.type === 'single' || q.type === 'multiple';
+    return '<div class="qcard" data-qi="' + i + '"><div class="qtop"><span class="qn">' + (i + 1) + '</span>' +
+      '<select data-qf="type">' + Object.keys(TYPES).map(t => '<option value="' + t + '"' + (q.type === t ? ' selected' : '') + '>' + TYPES[t] + '</option>').join('') + '</select>' +
+      '<div class="qact"><button class="btn btn-ghost btn-sm" data-qact="up" title="Subir"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="btn btn-ghost btn-sm" data-qact="down" title="Bajar"' + (i === n - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button class="btn btn-ghost btn-sm" data-qact="dup" title="Duplicar">⧉</button>' +
+      '<button class="btn btn-danger btn-sm" data-qact="del" title="Eliminar">✕</button></div></div>' +
+      '<div class="field" style="margin:6px 0"><input type="text" data-qf="text" placeholder="Escribí la pregunta" value="' + esc(q.text) + '"></div>' +
+      '<label class="check"><input type="checkbox" data-qf="required"' + (q.required ? ' checked' : '') + '> Respuesta obligatoria</label>' +
+      (choice ? '<div class="field" style="margin:6px 0"><label>Opciones (una por línea)</label><textarea data-qf="options">' + esc((q.options || []).join('\n')) + '</textarea></div>' +
+        '<label class="check"><input type="checkbox" data-qf="allowOther"' + (q.allowOther ? ' checked' : '') + '> Agregar opción “Otro” con texto libre</label>' : '') +
+      (q.type === 'number' ? '<div class="row"><div class="field" style="margin:6px 0;flex:1"><label>Mínimo (opcional)</label><input type="number" data-qf="min" value="' + esc(q.min == null ? '' : q.min) + '"></div>' +
+        '<div class="field" style="margin:6px 0;flex:1"><label>Máximo (opcional)</label><input type="number" data-qf="max" value="' + esc(q.max == null ? '' : q.max) + '"></div></div>' : '') +
+      '</div>';
+  }
+
+  function previewHTML(f){
+    return '<div style="font-weight:800;font-size:1.05rem;margin-bottom:4px">' + esc(f.title || 'Sin título') + '</div>' +
+      (f.description ? '<div class="muted" style="margin-bottom:12px">' + esc(f.description) + '</div>' : '<div style="height:10px"></div>') +
+      f.questions.map((q, i) => {
+        let b = '';
+        if (q.type === 'single' || q.type === 'multiple') {
+          const sym = q.type === 'single' ? '○' : '☐';
+          b = (q.options || []).map(o => '<div class="pv-o">' + sym + ' ' + esc(o) + '</div>').join('') + (q.allowOther ? '<div class="pv-o">' + sym + ' Otro: ______</div>' : '');
+        } else if (q.type === 'number') b = '<div class="pv-line"></div>';
+        else b = '<div class="pv-line" style="height:60px"></div>';
+        return '<div class="pv-q"><b>' + (i + 1) + '. ' + esc(q.text || '(sin texto)') + (q.required ? ' <span style="color:var(--warn)">*</span>' : '') + '</b>' + b + '</div>';
+      }).join('');
+  }
+
+  let saveTimer;
+  function touched(rerenderList){
+    const f = cur(); if (!f) return;
+    f.dirty = true; f.updatedAt = Date.now(); saveForms();
+    const pv = $('pv'); if (pv) pv.innerHTML = previewHTML(f);
+    if (rerenderList) renderList();
+    const ind = $('saveInd'); if (ind) { ind.classList.add('show'); clearTimeout(saveTimer); saveTimer = setTimeout(() => ind.classList.remove('show'), 1200); }
+  }
+
+  $('editor').addEventListener('input', e => {
+    const f = cur(); if (!f) return;
+    const t = e.target;
+    if (t.dataset.f) {
+      if (t.type === 'checkbox') return;
+      f[t.dataset.f] = t.value; touched(t.dataset.f === 'title');
+    } else if (t.dataset.qf) {
+      const q = f.questions[Number(t.closest('.qcard').dataset.qi)];
+      const k = t.dataset.qf;
+      if (k === 'type' || t.type === 'checkbox') return;
+      if (k === 'options') q.options = t.value.split('\n').map(s => s.trim()).filter(Boolean);
+      else if (k === 'min' || k === 'max') q[k] = t.value === '' ? null : Number(t.value);
+      else q[k] = t.value;
+      touched(false);
+    }
+  });
+  $('editor').addEventListener('change', e => {
+    const f = cur(); if (!f) return;
+    const t = e.target;
+    if (t.dataset.f && t.type === 'checkbox') { f[t.dataset.f] = t.checked; if (t.dataset.f === 'captureGeo' && !t.checked) f.geoRequired = false; touched(false); renderEditor(); }
+    else if (t.dataset.qf) {
+      const q = f.questions[Number(t.closest('.qcard').dataset.qi)];
+      const k = t.dataset.qf;
+      if (t.type === 'checkbox') q[k] = t.checked;
+      else if (k === 'type') q[k] = t.value;
+      else return; // texto, opciones y números se guardan en el evento 'input'
+      if (k === 'type' && (q.type === 'single' || q.type === 'multiple') && !(q.options && q.options.length)) q.options = ['Opción 1', 'Opción 2'];
+      touched(false); if (k === 'type') renderEditor();
+    }
+  });
+
+  $('editor').addEventListener('click', async e => {
+    const f = cur(); if (!f) return;
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.add) {
+      const t = b.dataset.add;
+      f.questions.push({ id: uid('q'), type: t, text: '', required: false, options: (t === 'single' || t === 'multiple') ? ['Opción 1', 'Opción 2'] : [], allowOther: false });
+      touched(true); renderEditor();
+      const cards = document.querySelectorAll('.qcard'); const last = cards[cards.length - 1];
+      if (last) { last.scrollIntoView({ behavior: 'smooth', block: 'center' }); const inp = last.querySelector('[data-qf=text]'); if (inp) inp.focus(); }
+      return;
+    }
+    if (b.dataset.qact) {
+      const i = Number(b.closest('.qcard').dataset.qi); const qs = f.questions;
+      if (b.dataset.qact === 'up' && i > 0) [qs[i - 1], qs[i]] = [qs[i], qs[i - 1]];
+      if (b.dataset.qact === 'down' && i < qs.length - 1) [qs[i + 1], qs[i]] = [qs[i], qs[i + 1]];
+      if (b.dataset.qact === 'dup') qs.splice(i + 1, 0, Object.assign(JSON.parse(JSON.stringify(qs[i])), { id: uid('q') }));
+      if (b.dataset.qact === 'del') { if (qs.length === 1) { toast('El formulario necesita al menos una pregunta.'); return; } qs.splice(i, 1); }
+      touched(true); renderEditor(); return;
+    }
+    switch (b.dataset.act) {
+      case 'publish': return publish(f);
+      case 'toggleActive': return toggleActive(f);
+      case 'dupForm': {
+        const c = JSON.parse(JSON.stringify(f)); c.id = uid('f'); c.title = f.title + ' (copia)'; c.published = false; c.publishedVersion = 0; c.active = true; c.dirty = true;
+        c.questions.forEach(q => q.id = uid('q')); forms.unshift(c); currentId = c.id; saveForms(); renderList(); renderEditor(); toast('Formulario duplicado'); return;
+      }
+      case 'export': {
+        const blob = new Blob([JSON.stringify(clean(f), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (f.title || 'formulario').replace(/[^\w\-]+/g, '_') + '.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); return;
+      }
+      case 'delForm':
+        if (confirm('¿Quitar este formulario de este navegador? Si estaba publicado, sigue en tu Google y las respuestas no se tocan.')) {
+          forms = forms.filter(x => x.id !== f.id); currentId = forms.length ? forms[0].id : null; saveForms(); renderList(); renderEditor();
+        }
+        return;
+    }
+  });
+
+  $('btnImport').addEventListener('click', () => $('fileImport').click());
+  $('fileImport').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      const f = JSON.parse(await file.text());
+      if (!f.title || !Array.isArray(f.questions)) throw new Error('x');
+      f.id = uid('f'); f.published = false; f.publishedVersion = 0; f.active = true; f.dirty = true;
+      f.questions.forEach(q => { q.id = uid('q'); });
+      forms.unshift(f); currentId = f.id; saveForms(); renderList(); renderEditor(); toast('Formulario importado');
+    } catch (err) { toast('El archivo no es un formulario válido.'); }
+    e.target.value = '';
+  });
+
+  function clean(f, version){
+    return { id: f.id, title: f.title.trim(), description: (f.description || '').trim(), version: version || f.version || 1,
+      captureGeo: !!f.captureGeo, geoRequired: !!(f.captureGeo && f.geoRequired), active: f.active !== false,
+      questions: f.questions.map(q => {
+        const o = { id: q.id, type: q.type, text: q.text.trim(), required: !!q.required };
+        if (q.type === 'single' || q.type === 'multiple') { o.options = q.options || []; o.allowOther = !!q.allowOther; }
+        if (q.type === 'number') { if (q.min != null) o.min = q.min; if (q.max != null) o.max = q.max; }
+        return o;
+      }) };
+  }
+  function validate(f){
+    if (!f.title.trim()) return 'Poné un título al formulario.';
+    if (!f.questions.length) return 'Agregá al menos una pregunta.';
+    for (let i = 0; i < f.questions.length; i++) {
+      const q = f.questions[i];
+      if (!q.text.trim()) return 'La pregunta ' + (i + 1) + ' no tiene texto.';
+      if ((q.type === 'single' || q.type === 'multiple') && !(q.options && q.options.length) && !q.allowOther) return 'La pregunta ' + (i + 1) + ' necesita al menos una opción.';
+      if (q.type === 'number' && q.min != null && q.max != null && q.min > q.max) return 'En la pregunta ' + (i + 1) + ' el mínimo es mayor que el máximo.';
+    }
+    return null;
+  }
+
+  function apiUrl(action){ return cfg.url + (cfg.url.indexOf('?') >= 0 ? '&' : '?') + 'action=' + action + '&token=' + encodeURIComponent(cfg.admin); }
+  async function apiGet(action){
+    const r = await fetch(apiUrl(action), { redirect: 'follow' }); const t = await r.text();
+    try { return JSON.parse(t); } catch (e) { throw new Error('Respuesta inesperada. Revisá que la URL sea la de la aplicación web (termina en /exec) y que el acceso sea “Cualquier persona”.'); }
+  }
+  async function apiPost(payload){
+    const r = await fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token: cfg.admin }, payload)), redirect: 'follow' });
+    const t = await r.text();
+    try { return JSON.parse(t); } catch (e) { throw new Error('Respuesta inesperada del servidor.'); }
+  }
+  function needCfg(){ if (!cfg.url || !cfg.admin) { toast('Primero completá la pestaña “Conexión con Google”.'); return true; } return false; }
+  function pubMsg(cls, t){ const m = $('pubMsg'); if (m) m.innerHTML = '<div class="msg ' + cls + '">' + esc(t) + '</div>'; }
+
+  async function publish(f){
+    const err = validate(f); if (err) return pubMsg('err', err);
+    if (needCfg()) return;
+    const version = (f.publishedVersion || 0) + 1;
+    pubMsg('info', 'Publicando…');
+    try {
+      const res = await apiPost({ action: 'publish', form: clean(f, version) });
+      if (!res.ok) throw new Error(res.error || 'No se pudo publicar.');
+      f.version = version; f.publishedVersion = version; f.published = true; f.dirty = false; saveForms(); renderList(); renderEditor();
+      pubMsg('ok', 'Publicado (versión ' + version + '). Los celulares lo van a descargar la próxima vez que se conecten.');
+    } catch (e) { pubMsg('err', (e.message || 'Error') + (e.message === 'Failed to fetch' ? ' — ¿tenés internet?' : '')); }
+  }
+  async function toggleActive(f){
+    if (needCfg()) return;
+    const nuevo = f.active === false;
+    try {
+      const res = await apiPost({ action: 'setActive', id: f.id, active: nuevo });
+      if (!res.ok) throw new Error(res.error || 'No se pudo cambiar el estado.');
+      f.active = nuevo; saveForms(); renderList(); renderEditor(); toast(nuevo ? 'Formulario reactivado' : 'Formulario archivado');
+    } catch (e) { pubMsg('err', e.message); }
+  }
+
+  $('codeBox').textContent = CODE_GS;
+  $('btnCopyCode').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(CODE_GS); toast('Código copiado'); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($('codeBox')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Seleccionado: copialo con Ctrl+C'); }
+  });
+  ['Url:url', 'Admin:admin', 'Campo:campo'].forEach(p => {
+    const [id, key] = p.split(':'); const el = $('cfg' + id); el.value = cfg[key] || '';
+    el.addEventListener('input', () => { cfg[key] = el.value.trim(); saveCfg(); });
+  });
+  function connMsg(cls, t){ $('connMsg').innerHTML = '<div class="msg ' + cls + '">' + esc(t) + '</div>'; }
+  $('btnTest').addEventListener('click', async () => {
+    if (!cfg.url || !cfg.admin) return connMsg('err', 'Completá la URL y la clave de administrador.');
+    connMsg('info', 'Probando…');
+    try {
+      const r = await apiGet('ping');
+      if (!r.ok) throw new Error(r.error);
+      cfg.planillaUrl = r.planillaUrl || ''; cfg.counts = r.conteos || {}; saveCfg(); renderList();
+      if (cfg.planillaUrl) { $('btnSheet').href = cfg.planillaUrl; $('btnSheet').style.display = 'inline-flex'; }
+      connMsg('ok', 'Conexión correcta. Tus respuestas se guardarán en la planilla “2612c - Encuestas” de tu Drive.');
+    } catch (e) { connMsg('err', (e.message === 'Failed to fetch' ? 'No se pudo conectar. ¿Tenés internet y la URL es correcta?' : e.message)); }
+  });
+  $('btnPull').addEventListener('click', async () => {
+    if (!cfg.url || !cfg.admin) return connMsg('err', 'Completá la URL y la clave de administrador.');
+    connMsg('info', 'Descargando…');
+    try {
+      const r = await apiGet('forms'); if (!r.ok) throw new Error(r.error);
+      let nuevos = 0, act = 0;
+      r.forms.forEach(sf => {
+        const loc = forms.find(x => x.id === sf.id);
+        const base = Object.assign({}, sf, { published: true, publishedVersion: sf.version || 1, dirty: false });
+        if (!loc) { forms.push(base); nuevos++; }
+        else if (!loc.dirty && (sf.version || 1) > (loc.publishedVersion || 0)) { Object.assign(loc, base); act++; }
+      });
+      if (!currentId && forms.length) currentId = forms[0].id;
+      saveForms(); renderList(); renderEditor();
+      connMsg('ok', nuevos + ' formularios nuevos y ' + act + ' actualizados.');
+    } catch (e) { connMsg('err', e.message); }
+  });
+  if (cfg.planillaUrl) { $('btnSheet').href = cfg.planillaUrl; $('btnSheet').style.display = 'inline-flex'; }
+
+  function b64url(s){ return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function renderTeam(){
+    const box = $('teamBox');
+    if (!cfg.url || !cfg.campo) { box.innerHTML = '<div class="msg info">Completá la URL y la clave de encuestadores en la pestaña “Conexión con Google” para generar el enlace.</div>'; return; }
+    const link = new URL('app.html', location.href).href + '#cfg=' + b64url(JSON.stringify({ u: cfg.url, t: cfg.campo }));
+    box.innerHTML = '<div class="linkbox" id="teamLink">' + esc(link) + '</div><div class="row" style="margin:10px 0"><button class="btn btn-dark" id="btnCopyLink">Copiar enlace</button></div>';
+    $('btnCopyLink').addEventListener('click', async () => { try { await navigator.clipboard.writeText(link); toast('Enlace copiado'); } catch (e) { toast('No se pudo copiar: seleccionalo a mano'); } });
+  }
+
+  renderList(); renderEditor();
+})();
+</script>
+</body>
+</html>
