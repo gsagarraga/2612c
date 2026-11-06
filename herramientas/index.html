@@ -1574,9 +1574,64 @@
     if (ppEditado && !confirm('¿Rehacer la propuesta con los datos del presupuestador? Se pierden las correcciones hechas a mano.')) return;
     ppRellenar();
   });
+  /* PDF: se imprime en un documento aparte (iframe) con hoja A4, asi el resto del panel
+     o las extensiones del navegador no achican ni cortan la propuesta. */
+  const PP_DOC_CSS = `
+    @page{size:A4;margin:14mm 15mm;}
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;background:#fff;}
+    body{font-family:'Rubik',system-ui,sans-serif;color:#222;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    h1,h2{font-family:'Rubik',sans-serif;font-weight:800;letter-spacing:-0.01em;color:#23262B;margin:0;}
+    .pp-header{display:flex;align-items:center;gap:16px;margin-bottom:26px;border-bottom:2px solid #23262B;padding-bottom:16px;}
+    .pp-header img{width:52px;height:52px;flex:none;}
+    .pp-header .pp-htext{flex:1;min-width:0;}
+    .pp-header h1{font-size:1.25rem;margin:0;}
+    .pp-header .pp-client{font-size:0.85rem;color:#555;margin-top:2px;}
+    .pp-header .pp-meta{font-size:0.8rem;color:#555;text-align:right;white-space:nowrap;}
+    h2{font-size:1rem;margin:22px 0 8px;page-break-after:avoid;break-after:avoid;}
+    p, li{font-size:0.88rem;line-height:1.55;color:#222;}
+    p{margin:0 0 10px;}
+    ul{margin:6px 0;padding-left:20px;}
+    .pp-table{width:100%;border-collapse:collapse;margin-top:6px;}
+    .pp-table tr{page-break-inside:avoid;break-inside:avoid;}
+    .pp-table th, .pp-table td{border:1px solid #ccc;padding:9px 11px;text-align:left;font-size:0.85rem;vertical-align:top;}
+    .pp-table th:last-child, .pp-table td:last-child{text-align:right;white-space:nowrap;}
+    .pp-table .pp-desc{margin:4px 0 0;font-size:0.78rem;color:#555;line-height:1.45;}
+    .pp-total-row td{font-weight:700;border-top:2px solid #23262B;}
+    .pp-footer{margin-top:30px;font-size:0.85rem;border-top:1px solid #ccc;padding-top:14px;page-break-inside:avoid;break-inside:avoid;}
+  `;
+  function ppNombreArchivo(){
+    const cliente = ($pp('pp-cliente').value.trim() || 'cliente').replace(/[^\wáéíóúñÁÉÍÓÚÑ-]+/g, '_').slice(0, 40);
+    return 'Propuesta_2612c_' + cliente + '_' + ($pp('pp-fecha').value || ppHoy());
+  }
+  function ppDocumentoImpresion(){
+    return '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>' + ppEsc(ppNombreArchivo()) + '</title>'
+      + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">'
+      + '<style>' + PP_DOC_CSS + '</style></head><body>' + $pp('print-proposal').innerHTML + '</body></html>';
+  }
+  window.ppDocumentoImpresion = ppDocumentoImpresion;
   $pp('pp-print').addEventListener('click', () => {
-    document.body.classList.add('printing-proposal');
-    window.print();
+    const viejo = document.getElementById('pp-print-frame'); if (viejo) viejo.remove();
+    const fr = document.createElement('iframe');
+    fr.id = 'pp-print-frame';
+    fr.setAttribute('aria-hidden', 'true');
+    fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+    document.body.appendChild(fr);
+    const d = fr.contentWindow.document;
+    d.open(); d.write(ppDocumentoImpresion()); d.close();
+    const imprimir = () => {
+      const w = fr.contentWindow;
+      const listo = (w.document.fonts && w.document.fonts.ready) ? w.document.fonts.ready : Promise.resolve();
+      Promise.race([listo, new Promise(r => setTimeout(r, 2500))]).then(() => {
+        const imgs = Array.from(w.document.images);
+        return Promise.all(imgs.map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
+      }).then(() => { w.focus(); w.print(); });
+    };
+    let espera = 0;
+    const t = setInterval(() => {
+      espera += 100;
+      if (fr.contentWindow.document.readyState === 'complete' || espera >= 4000) { clearInterval(t); imprimir(); }
+    }, 100);
   });
   window.generarPropuestaPDF = function(){ window.abrirPropuesta(); };
 
